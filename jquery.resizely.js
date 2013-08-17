@@ -33,7 +33,9 @@ if( typeof jQuery == 'function' ){
             sw: screen.width,
             sh: screen.height,
             d: 'resize.ly',
-            dpr: ( 'devicePixelRatio' in window ? devicePixelRatio : '1' )
+            dpr: ( 'devicePixelRatio' in window ? devicePixelRatio : '1' ),
+            dbg: true,
+            bp: 250
         },
         /**
          * Setup our methods
@@ -105,17 +107,50 @@ if( typeof jQuery == 'function' ){
             changeSrc: function( i, e ){
                 /** Init Vars */
                 var $e = $( e ),
-                    ew = $e.width(),
-                    eh = $e.height(),
                     src = $e.attr( 'data-src' ),
                     x = s.sw + 'x' + s.sh + ',' + s.dpr,
                     o = window.location.protocol + '//' + window.location.host,
                     p = window.location.pathname,
                     newSrc;
-                /** Debug
-                console.log( e );
-                console.log( ew + "x" + eh );
-                debugger; */
+                /** We can't find a width or a height, we should replace the image to find its width */
+                var transparent_img = '/img/transparent_dot.png';
+                if( s.dbg ){
+                    transparent_img = '/img/transparent_red_dot.png';
+                }
+                /** Backup the title attribute */
+                $e.attr( {
+                    '_title': $e.attr( 'title' )
+                } ).removeAttr( 'title' );
+                /** Ok, made the src the transparent dot */
+                $e.attr( 'src', window.location.protocol + '//' + s.d + transparent_img );
+                /** Now, grab the width */
+                var ew = $e.width(), eh = $e.height();
+                /** Debug */
+                if( s.dbg ){
+                    console.log( e );
+                    console.log( ew + "x" + eh );
+                }
+                /** If the height and width are only 1px, then we know that we need to try setting the width inline */
+                if( ( ew == 1 && eh == 1 ) || ( !ew && !eh ) ){
+                    if( s.dbg ){
+                        console.log( 'Setting manual width...' );
+                    }
+                    $e.attr( '_width', $e.attr( 'width' ) );
+                    $e.attr( 'width', '100%' );
+                    /** We do one final assignment, and that's it */
+                    ew = $e.width();
+                    /** Now restore it */
+                    $e.attr( 'width', ( typeof $e.attr( '_width' ) == 'undefined' ? '' : $e.attr( '_width' ) ) );
+                    $e.removeAttr( '_width' );
+                }
+                /** Debug */
+                if( s.dbg ){
+                    console.log( ew + "x" + eh );
+                }
+                /** Restore the title */
+                $e.attr( {
+                    'title': $e.attr( '_title' )
+                } ).removeAttr( '_title' );
                 /** Change the src as needed */
                 if( !( src.substring( 0, 5 ) == 'http:' || src.substring( 0, 6 ) == 'https:' ) ){
                     if( src.substring( 0, 1 ) == '/' ){
@@ -128,10 +163,6 @@ if( typeof jQuery == 'function' ){
                 newSrc = window.location.protocol + '//' + s.d + '/' + ( ew ? ew : '' ) + 'x' + ( eh ? eh : '' ) + '/' + src + '?x=' + f.base64_encode( f.rc4( 'rly', x ) );
                 /** Change the attribute */
                 $e.attr( 'src', newSrc );
-                /** Now, see if we have a data title */
-                if( typeof $e.attr( 'data-title' ) != 'undefined' ){
-                    $e.attr( 'title', $e.attr( 'data-title' ) );
-                }
                 /** Return this */
                 return this;
             },
