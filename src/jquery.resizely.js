@@ -174,17 +174,28 @@ if( typeof jQuery == 'function' ){
             if( s.dbg ){
               console.log( 'Could not determine dimensions. Setting manual width.' );
             }
-            $e.queue( function(){
-              $e.attr( '_width', $e.attr( 'width' ) );
-              $e.attr( 'width', '100%' );
-              /** We do one final assignment, and that's it */
-              ew = $e.width();
-              /** Now restore it */
-              $e.attr( 'width', ( typeof $e.attr( '_width' ) == 'undefined' ? '' : $e.attr( '_width' ) ) );
-              $e.removeAttr( '_width' );
-              /** Get rid of our height determination */
+            $e.attr( '_style', $e.attr( 'style' ) );
+            $e.attr( 'style', ( typeof $e.attr( '_style' ) != 'undefined' ? $e.attr( '_style' ).toString() : '' ) + 'width: 100% !important;' );
+            /** We do one final assignment, and that's it */
+            ew = $e.width();
+            /** Now restore it */
+            $e.attr( 'style', ( typeof $e.attr( '_style' ) == 'undefined' ? '' : $e.attr( '_style' ) ) );
+            $e.removeAttr( '_style' );
+            /** Get rid of our height determination */
+            eh = 0;
+          }
+          /** Ok, if the height and width are equal, change the width to some arbitrary number between 10 and 100 */
+          if( ew == eh ){
+            /** Backup the width, set the width, and check to see if width and height are still equal */
+            $e.attr( '_style', $e.attr( 'style' ) );
+            $e.attr( 'style', ( typeof $e.attr( '_style' ) != 'undefined' ? $e.attr( '_style' ).toString() : '' ) + 'width: ' + Math.floor( Math.random() * ( 100 - 10 + 1 ) + 10 ).toString() + 'px !important;' );
+            if( $e.width() == $e.height() ){
+              /** Ok, so they're equal - this is probably an auto-height element */
               eh = 0;
-            } );
+            }
+            /** Restore the width */
+            $e.attr( 'style', ( typeof $e.attr( '_style' ) == 'undefined' ? '' : $e.attr( '_style' ) ) );
+            $e.removeAttr( '_style' );
           }
           /** Ok, now we should check our breakpoints and see if we should be using them */
           if( ew >= s.minbp ){
@@ -214,6 +225,15 @@ if( typeof jQuery == 'function' ){
           }
           /** Generate the new src */
           newSrc = window.location.protocol + '//' + s.d + '/' + ( ew ? ew : '' ) + 'x' + ( eh ? eh : '' ) + '/' + src + '?x=' + f.base64_encode( f.rc4( 'rly', x ) );
+          /** Set a low width/height */
+          $e.attr( '_style', $e.attr( 'style' ) );
+          $e.attr( 'style', ( typeof $e.attr( '_style' ) != 'undefined' ? $e.attr( '_style' ).toString() : '' ) + 'width: 1px !important; height: 1px !important;' );
+          /** Setup our images loaded function to restore width */
+          $e.imagesLoaded().done( function( instance ){
+            /** Restore the width */
+            $e.attr( 'style', ( typeof $e.attr( '_style' ) == 'undefined' ? '' : $e.attr( '_style' ) ) );
+            $e.removeAttr( '_style' );
+          } );
           /** Change the attribute */
           $e.attr( 'src', newSrc );
         } );
