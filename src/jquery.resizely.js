@@ -51,7 +51,7 @@
  * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-(function(){"use strict";function e(){}function t(e,t){for(var n=e.length;n--;)if(e[n].listener===t)return n;return-1}var n=e.prototype;n.getListeners=function(e){var t,n,i=this._getEvents();if("object"==typeof e){t={};for(n in i)i.hasOwnProperty(n)&&e.test(n)&&(t[n]=i[n])}else t=i[e]||(i[e]=[]);return t},n.flattenListeners=function(e){var t,n=[];for(t=0;e.length>t;t+=1)n.push(e[t].listener);return n},n.getListenersAsObject=function(e){var t,n=this.getListeners(e);return n instanceof Array&&(t={},t[e]=n),t||n},n.addListener=function(e,n){var i,r=this.getListenersAsObject(e),o="object"==typeof n;for(i in r)r.hasOwnProperty(i)&&-1===t(r[i],n)&&r[i].push(o?n:{listener:n,once:!1});return this},n.on=n.addListener,n.addOnceListener=function(e,t){return this.addListener(e,{listener:t,once:!0})},n.once=n.addOnceListener,n.defineEvent=function(e){return this.getListeners(e),this},n.defineEvents=function(e){for(var t=0;e.length>t;t+=1)this.defineEvent(e[t]);return this},n.removeListener=function(e,n){var i,r,o=this.getListenersAsObject(e);for(r in o)o.hasOwnProperty(r)&&(i=t(o[r],n),-1!==i&&o[r].splice(i,1));return this},n.off=n.removeListener,n.addListeners=function(e,t){return this.manipulateListeners(!1,e,t)},n.removeListeners=function(e,t){return this.manipulateListeners(!0,e,t)},n.manipulateListeners=function(e,t,n){var i,r,o=e?this.removeListener:this.addListener,s=e?this.removeListeners:this.addListeners;if("object"!=typeof t||t instanceof RegExp)for(i=n.length;i--;)o.call(this,t,n[i]);else for(i in t)t.hasOwnProperty(i)&&(r=t[i])&&("function"==typeof r?o.call(this,i,r):s.call(this,i,r));return this},n.removeEvent=function(e){var t,n=typeof e,i=this._getEvents();if("string"===n)delete i[e];else if("object"===n)for(t in i)i.hasOwnProperty(t)&&e.test(t)&&delete i[t];else delete this._events;return this},n.emitEvent=function(e,t){var n,i,r,o,s=this.getListenersAsObject(e);for(r in s)if(s.hasOwnProperty(r))for(i=s[r].length;i--;)n=s[r][i],o=n.listener.apply(this,t||[]),(o===this._getOnceReturnValue()||n.once===!0)&&this.removeListener(e,s[r][i].listener);return this},n.trigger=n.emitEvent,n.emit=function(e){var t=Array.prototype.slice.call(arguments,1);return this.emitEvent(e,t)},n.setOnceReturnValue=function(e){return this._onceReturnValue=e,this},n._getOnceReturnValue=function(){return this.hasOwnProperty("_onceReturnValue")?this._onceReturnValue:!0},n._getEvents=function(){return this._events||(this._events={})},"function"==typeof define&&define.amd?define(function(){return e}):"undefined"!=typeof module&&module.exports?module.exports=e:this.EventEmitter=e}).call(this),function(e){"use strict";var t=document.documentElement,n=function(){};t.addEventListener?n=function(e,t,n){e.addEventListener(t,n,!1)}:t.attachEvent&&(n=function(t,n,i){t[n+i]=i.handleEvent?function(){var t=e.event;t.target=t.target||t.srcElement,i.handleEvent.call(i,t)}:function(){var n=e.event;n.target=n.target||n.srcElement,i.call(t,n)},t.attachEvent("on"+n,t[n+i])});var i=function(){};t.removeEventListener?i=function(e,t,n){e.removeEventListener(t,n,!1)}:t.detachEvent&&(i=function(e,t,n){e.detachEvent("on"+t,e[t+n]);try{delete e[t+n]}catch(i){e[t+n]=void 0}});var r={bind:n,unbind:i};"function"==typeof define&&define.amd?define(r):e.eventie=r}(this),function(e){"use strict";function t(e,t){for(var n in t)e[n]=t[n];return e}function n(e){return"[object Array]"===c.call(e)}function i(e){var t=[];if(n(e))t=e;else if("number"==typeof e.length)for(var i=0,r=e.length;r>i;i++)t.push(e[i]);else t.push(e);return t}function r(e,n){function r(e,n,s){if(!(this instanceof r))return new r(e,n);"string"==typeof e&&(e=document.querySelectorAll(e)),this.elements=i(e),this.options=t({},this.options),"function"==typeof n?s=n:t(this.options,n),s&&this.on("always",s),this.getImages(),o&&(this.jqDeferred=new o.Deferred);var a=this;setTimeout(function(){a.check()})}function c(e){this.img=e}r.prototype=new e,r.prototype.options={},r.prototype.getImages=function(){this.images=[];for(var e=0,t=this.elements.length;t>e;e++){var n=this.elements[e];"IMG"===n.nodeName&&this.addImage(n);for(var i=n.querySelectorAll("img"),r=0,o=i.length;o>r;r++){var s=i[r];this.addImage(s)}}},r.prototype.addImage=function(e){var t=new c(e);this.images.push(t)},r.prototype.check=function(){function e(e,r){return t.options.debug&&a&&s.log("confirm",e,r),t.progress(e),n++,n===i&&t.complete(),!0}var t=this,n=0,i=this.images.length;if(this.hasAnyBroken=!1,!i)return this.complete(),void 0;for(var r=0;i>r;r++){var o=this.images[r];o.on("confirm",e),o.check()}},r.prototype.progress=function(e){this.hasAnyBroken=this.hasAnyBroken||!e.isLoaded;var t=this;setTimeout(function(){t.emit("progress",t,e),t.jqDeferred&&t.jqDeferred.notify(t,e)})},r.prototype.complete=function(){var e=this.hasAnyBroken?"fail":"done";this.isComplete=!0;var t=this;setTimeout(function(){if(t.emit(e,t),t.emit("always",t),t.jqDeferred){var n=t.hasAnyBroken?"reject":"resolve";t.jqDeferred[n](t)}})},o&&(o.fn.imagesLoaded=function(e,t){var n=new r(this,e,t);return n.jqDeferred.promise(o(this))});var f={};return c.prototype=new e,c.prototype.check=function(){var e=f[this.img.src];if(e)return this.useCached(e),void 0;if(f[this.img.src]=this,this.img.complete&&void 0!==this.img.naturalWidth)return this.confirm(0!==this.img.naturalWidth,"naturalWidth"),void 0;var t=this.proxyImage=new Image;n.bind(t,"load",this),n.bind(t,"error",this),t.src=this.img.src},c.prototype.useCached=function(e){if(e.isConfirmed)this.confirm(e.isLoaded,"cached was confirmed");else{var t=this;e.on("confirm",function(e){return t.confirm(e.isLoaded,"cache emitted confirmed"),!0})}},c.prototype.confirm=function(e,t){this.isConfirmed=!0,this.isLoaded=e,this.emit("confirm",this,t)},c.prototype.handleEvent=function(e){var t="on"+e.type;this[t]&&this[t](e)},c.prototype.onload=function(){this.confirm(!0,"onload"),this.unbindProxyEvents()},c.prototype.onerror=function(){this.confirm(!1,"onerror"),this.unbindProxyEvents()},c.prototype.unbindProxyEvents=function(){n.unbind(this.proxyImage,"load",this),n.unbind(this.proxyImage,"error",this)},r}var o=e.jQuery,s=e.console,a=s!==void 0,c=Object.prototype.toString;"function"==typeof define&&define.amd?define(["eventEmitter/EventEmitter","eventie/eventie"],r):e.imagesLoaded=r(e.EventEmitter,e.eventie)}(window);
+(function(){function e(){}function n(e,t){var n=e.length;while(n--){if(e[n].listener===t){return n}}return-1}var t=e.prototype;t.getListeners=function(t){var n=this._getEvents();var r;var i;if(typeof t==="object"){r={};for(i in n){if(n.hasOwnProperty(i)&&t.test(i)){r[i]=n[i]}}}else{r=n[t]||(n[t]=[])}return r};t.flattenListeners=function(t){var n=[];var r;for(r=0;r<t.length;r+=1){n.push(t[r].listener)}return n};t.getListenersAsObject=function(t){var n=this.getListeners(t);var r;if(n instanceof Array){r={};r[t]=n}return r||n};t.addListener=function(t,r){var i=this.getListenersAsObject(t);var s=typeof r==="object";var o;for(o in i){if(i.hasOwnProperty(o)&&n(i[o],r)===-1){i[o].push(s?r:{listener:r,once:false})}}return this};t.on=t.addListener;t.addOnceListener=function(t,n){return this.addListener(t,{listener:n,once:true})};t.once=t.addOnceListener;t.defineEvent=function(t){this.getListeners(t);return this};t.defineEvents=function(t){for(var n=0;n<t.length;n+=1){this.defineEvent(t[n])}return this};t.removeListener=function(t,r){var i=this.getListenersAsObject(t);var s;var o;for(o in i){if(i.hasOwnProperty(o)){s=n(i[o],r);if(s!==-1){i[o].splice(s,1)}}}return this};t.off=t.removeListener;t.addListeners=function(t,n){return this.manipulateListeners(false,t,n)};t.removeListeners=function(t,n){return this.manipulateListeners(true,t,n)};t.manipulateListeners=function(t,n,r){var i;var s;var o=t?this.removeListener:this.addListener;var u=t?this.removeListeners:this.addListeners;if(typeof n==="object"&&!(n instanceof RegExp)){for(i in n){if(n.hasOwnProperty(i)&&(s=n[i])){if(typeof s==="function"){o.call(this,i,s)}else{u.call(this,i,s)}}}}else{i=r.length;while(i--){o.call(this,n,r[i])}}return this};t.removeEvent=function(t){var n=typeof t;var r=this._getEvents();var i;if(n==="string"){delete r[t]}else{if(n==="object"){for(i in r){if(r.hasOwnProperty(i)&&t.test(i)){delete r[i]}}}else{delete this._events}}return this};t.emitEvent=function(t,n){var r=this.getListenersAsObject(t);var i;var s;var o;var u;for(o in r){if(r.hasOwnProperty(o)){s=r[o].length;while(s--){i=r[o][s];u=i.listener.apply(this,n||[]);if(u===this._getOnceReturnValue()||i.once===true){this.removeListener(t,r[o][s].listener)}}}}return this};t.trigger=t.emitEvent;t.emit=function(t){var n=Array.prototype.slice.call(arguments,1);return this.emitEvent(t,n)};t.setOnceReturnValue=function(t){this._onceReturnValue=t;return this};t._getOnceReturnValue=function(){if(this.hasOwnProperty("_onceReturnValue")){return this._onceReturnValue}else{return true}};t._getEvents=function(){return this._events||(this._events={})};if(typeof module!=="undefined"&&module.exports){module.exports=e}else{this.EventEmitter=e}}).call(this);(function(e){var t=document.documentElement;var n=function(){};if(t.addEventListener){n=function(e,t,n){e.addEventListener(t,n,false)}}else{if(t.attachEvent){n=function(t,n,r){t[n+r]=r.handleEvent?function(){var t=e.event;t.target=t.target||t.srcElement;r.handleEvent.call(r,t)}:function(){var n=e.event;n.target=n.target||n.srcElement;r.call(t,n)};t.attachEvent("on"+n,t[n+r])}}}var r=function(){};if(t.removeEventListener){r=function(e,t,n){e.removeEventListener(t,n,false)}}else{if(t.detachEvent){r=function(e,t,n){e.detachEvent("on"+t,e[t+n]);try{delete e[t+n]}catch(r){e[t+n]=undefined}}}}var i={bind:n,unbind:r};e.eventie=i})(this);(function(e){function i(e,t){for(var n in t){e[n]=t[n]}return e}function o(e){return s.call(e)==="[object Array]"}function u(e){var t=[];if(o(e)){t=e}else{if(typeof e.length==="number"){for(var n=0,r=e.length;n<r;n++){t.push(e[n])}}else{t.push(e)}}return t}function a(e,s){function o(e,n,r){if(!(this instanceof o)){return new o(e,n)}if(typeof e==="string"){e=document.querySelectorAll(e)}this.elements=u(e);this.options=i({},this.options);if(typeof n==="function"){r=n}else{i(this.options,n)}if(r){this.on("always",r)}this.getImages();if(t){this.jqDeferred=new t.Deferred}var s=this;setTimeout(function(){s.check()})}function f(e){this.img=e}o.prototype=new e;o.prototype.options={};o.prototype.getImages=function(){this.images=[];for(var e=0,t=this.elements.length;e<t;e++){var n=this.elements[e];if(n.nodeName==="IMG"){this.addImage(n)}var r=n.querySelectorAll("img");for(var i=0,s=r.length;i<s;i++){var o=r[i];this.addImage(o)}}};o.prototype.addImage=function(e){var t=new f(e);this.images.push(t)};o.prototype.check=function(){function s(s,o){if(e.options.debug&&r){n.log("confirm",s,o)}e.progress(s);t++;if(t===i){e.complete()}return true}var e=this;var t=0;var i=this.images.length;this.hasAnyBroken=false;if(!i){this.complete();return}for(var o=0;o<i;o++){var u=this.images[o];u.on("confirm",s);u.check()}};o.prototype.progress=function(e){this.hasAnyBroken=this.hasAnyBroken||!e.isLoaded;var t=this;setTimeout(function(){t.emit("progress",t,e);if(t.jqDeferred){t.jqDeferred.notify(t,e)}})};o.prototype.complete=function(){var e=this.hasAnyBroken?"fail":"done";this.isComplete=true;var t=this;setTimeout(function(){t.emit(e,t);t.emit("always",t);if(t.jqDeferred){var n=t.hasAnyBroken?"reject":"resolve";t.jqDeferred[n](t)}})};if(t){t.fn.imagesLoaded=function(e,n){var r=new o(this,e,n);return r.jqDeferred.promise(t(this))}}var a={};f.prototype=new e;f.prototype.check=function(){var e=a[this.img.src];if(e){this.useCached(e);return}a[this.img.src]=this;if(this.img.complete&&this.img.naturalWidth!==undefined){this.confirm(this.img.naturalWidth!==0,"naturalWidth");return}var t=this.proxyImage=new Image;s.bind(t,"load",this);s.bind(t,"error",this);t.src=this.img.src};f.prototype.useCached=function(e){if(e.isConfirmed){this.confirm(e.isLoaded,"cached was confirmed")}else{var t=this;e.on("confirm",function(e){t.confirm(e.isLoaded,"cache emitted confirmed");return true})}};f.prototype.confirm=function(e,t){this.isConfirmed=true;this.isLoaded=e;this.emit("confirm",this,t)};f.prototype.handleEvent=function(e){var t="on"+e.type;if(this[t]){this[t](e)}};f.prototype.onload=function(){this.confirm(true,"onload");this.unbindProxyEvents()};f.prototype.onerror=function(){this.confirm(false,"onerror");this.unbindProxyEvents()};f.prototype.unbindProxyEvents=function(){s.unbind(this.proxyImage,"load",this);s.unbind(this.proxyImage,"error",this)};return o}var t=e.jQuery;var n=e.console;var r=typeof n!=="undefined";var s=Object.prototype.toString;e.imagesLoaded=a(e.EventEmitter,e.eventie)})(window)
 
 if( typeof jQuery == 'function' ){
   ( function( $ ){
@@ -62,13 +62,16 @@ if( typeof jQuery == 'function' ){
      *
      */
     var s = {
-      sw: screen.width,
-      sh: screen.height,
-      d: 'resize.ly',
-      dpr: ( 'devicePixelRatio' in window ? devicePixelRatio : '1' ),
-      dbg: false,
-      bp: 250,
-      minbp: 500
+      sw: screen.width, /** Override to set a manual screen width */
+      sh: screen.height, /** Override to set a manual screen height */
+      d: 'resize.ly', /** Change the domain that resize.ly is using (for debugging) */
+      dpr: ( 'devicePixelRatio' in window ? devicePixelRatio : '1' ), /** Override to set a manual DPR */
+      dbg: false, /** Enable debug mode to see extra console messages */
+      bp: 250, /** Set the breakpoints for images */
+      minbp: 500, /** Set the minimum breakpoint for images */
+      fp: null, /** Try to force premium status on an image */
+      fu: null, /** Force Resize.ly to rerender the image on each request */
+      fw: null /** Force Resize.ly to watermark the image on render */
     },
 
     /**
@@ -154,16 +157,16 @@ if( typeof jQuery == 'function' ){
           dw = $e.attr( 'data-width' ),
           dh = $e.attr( 'data-height' );
         /** We can't find a width or a height, we should replace the image to find its width */
-        var transparent_img = '/img/transparent_dot.png';
+        var transparent_img = window.location.protocol + '//' + s.d + '/img/transparent_dot.png';
         if( s.dbg ){
-          transparent_img = '/img/transparent_red_dot.png';
+          transparent_img = window.location.protocol + '//' + s.d + '/img/transparent_red_dot.png';
         }
         /** Listen for the image loaded event */
-        var il = imagesLoaded( e );
-        var il_f;
-        il_f = function(){
-          /** Turn off the il function now */
-          il.off( 'always', il_f );
+        imagesLoaded( e, function(){
+          /** If our image is the transparent dot, we should just bail */
+          if( $e.attr( 'src' ) != transparent_img ){
+            return;
+          }
           /** Get our calculated widths */
           ew = $e.width(), eh = $e.height();
           /** Debug */
@@ -198,11 +201,10 @@ if( typeof jQuery == 'function' ){
             $e.removeAttr( '_style' );
             if( tw == th ){
               /** Ok, so they're equal - this is probably an auto-height element, however, check defined styles or attributes first */
-              if( !$e.attr( 'height' ) && !$e.css( 'height' ) ){
+              if( !$e.attr( 'height' ) ){
                 eh = 0;
               }
             }
-
           }
           /** Ok, now we should check our breakpoints and see if we should be using them */
           if( ew >= s.minbp ){
@@ -213,6 +215,19 @@ if( typeof jQuery == 'function' ){
             if( eh ){
               eh = Math.round( eh * ( ew / oew ) );
             }
+          }
+          /** Ok, lets see if we have data-width or data-height defined */
+          if( dw ){
+            if( s.dbg ){
+              console.log( 'Manual dimensions found for width.' );
+            }
+            ew = dw;
+          }
+          if( dh ){
+            if( s.dbg ){
+              console.log( 'Manual dimensions found for height.' );
+            }
+            eh = dh;
           }
           /** Debug */
           if( s.dbg ){
@@ -229,31 +244,29 @@ if( typeof jQuery == 'function' ){
           /** Set a low width/height */
           $e.attr( '_style', $e.attr( 'style' ) );
           $e.attr( 'style', ( typeof $e.attr( '_style' ) != 'undefined' ? $e.attr( '_style' ).toString() : '' ) + 'width: 1px !important; height: 1px !important;' );
-          var il2 = imagesLoaded( e );
-          /** Setup our images loaded function to restore width */
-          var il_f2 = function( instance ){
+          /** Generate the new src */
+          newSrc = window.location.protocol + '//' + s.d + '/' + ( ew ? ew : '' ) + 'x' + ( eh ? eh : '' ) + '/' + src + '?x=' + f.base64_encode( f.rc4( 'rly', x ) );
+          /** Now, see if we have any additional parameters */
+          if( typeof s.fp == 'boolean' ){
+            newSrc = newSrc + '&force_premium=' + ( s.fp ? '1' : '0' );
+          }
+          if( typeof s.fu == 'boolean' ){
+            newSrc = newSrc + '&force_update=' + ( s.fu ? '1' : '0' );
+          }
+          if( typeof s.fw == 'boolean' ){
+            newSrc = newSrc + '&force_watermark=' + ( s.fw ? '1' : '0' );
+          }
+          /** Listen for the image loaded event, and restore the button when it comes */
+          imagesLoaded( e, function(){
             /** Restore the width */
             $e.attr( 'style', ( typeof $e.attr( '_style' ) == 'undefined' ? '' : $e.attr( '_style' ) ) );
             $e.removeAttr( '_style' );
-          };
-          /** Listen to the event now */
-          il2.on( 'always', il_f2 );
-          /** Ok, lets see if we have data-width or data-height defined */
-          if( dw ){
-            ew = dw;
-          }
-          if( dh ){
-            eh = dh;
-          }
-          /** Generate the new src */
-          newSrc = window.location.protocol + '//' + s.d + '/' + ( ew ? ew : '' ) + 'x' + ( eh ? eh : '' ) + '/' + src + '?x=' + f.base64_encode( f.rc4( 'rly', x ) );
+          } );
           /** Change the attribute */
           $e.attr( 'src', newSrc );
-        };
-        /** Listen to the event now */
-        il.on( 'always', il_f );
+        } );
         /** Change our attribute */
-        $e.attr( 'src', window.location.protocol + '//' + s.d + transparent_img );
+        $e.attr( 'src', transparent_img );
         /** Return this */
         return this;
       },
