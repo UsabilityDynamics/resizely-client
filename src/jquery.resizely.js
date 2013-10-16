@@ -150,18 +150,20 @@ if( typeof jQuery == 'function' ){
           p = window.location.pathname,
           newSrc,
           ew = 0,
-          eh = 0;
+          eh = 0,
+          dw = $e.attr( 'data-width' ),
+          dh = $e.attr( 'data-height' );
         /** We can't find a width or a height, we should replace the image to find its width */
         var transparent_img = '/img/transparent_dot.png';
         if( s.dbg ){
           transparent_img = '/img/transparent_red_dot.png';
         }
-        /** Backup the title attribute, and change our source to the temp one */
-        $e.attr( {
-          '_title': $e.attr( 'title' )
-        } ).removeAttr( 'title' );
         /** Listen for the image loaded event */
-        imagesLoaded( e, function(){
+        var il = imagesLoaded( e );
+        var il_f;
+        il_f = function(){
+          /** Turn off the il function now */
+          il.off( 'always', il_f );
           /** Get our calculated widths */
           ew = $e.width(), eh = $e.height();
           /** Debug */
@@ -189,13 +191,18 @@ if( typeof jQuery == 'function' ){
             /** Backup the width, set the width, and check to see if width and height are still equal */
             $e.attr( '_style', $e.attr( 'style' ) );
             $e.attr( 'style', ( typeof $e.attr( '_style' ) != 'undefined' ? $e.attr( '_style' ).toString() : '' ) + 'width: ' + Math.floor( Math.random() * ( 100 - 10 + 1 ) + 10 ).toString() + 'px !important;' );
-            if( $e.width() == $e.height() ){
-              /** Ok, so they're equal - this is probably an auto-height element */
-              eh = 0;
-            }
-            /** Restore the width */
+            /** Setup our test variables */
+            var tw = $e.width(), th = $e.height();
+            /** Restore the old widths */
             $e.attr( 'style', ( typeof $e.attr( '_style' ) == 'undefined' ? '' : $e.attr( '_style' ) ) );
             $e.removeAttr( '_style' );
+            if( tw == th ){
+              /** Ok, so they're equal - this is probably an auto-height element, however, check defined styles or attributes first */
+              if( !$e.attr( 'height' ) && !$e.css( 'height' ) ){
+                eh = 0;
+              }
+            }
+
           }
           /** Ok, now we should check our breakpoints and see if we should be using them */
           if( ew >= s.minbp ){
@@ -211,11 +218,7 @@ if( typeof jQuery == 'function' ){
           if( s.dbg ){
             console.log( 'New Dimensions: ' + ew + "x" + eh );
           }
-          /** Restore the title */
-          $e.attr( {
-            'title': $e.attr( '_title' )
-          } ).removeAttr( '_title' );
-          /** Change the src as needed */
+          /** Update the image source */
           if( !( src.substring( 0, 5 ) == 'http:' || src.substring( 0, 6 ) == 'https:' ) ){
             if( src.substring( 0, 1 ) == '/' ){
               src = o + src;
@@ -223,20 +226,32 @@ if( typeof jQuery == 'function' ){
               src = o + p.substring( 0, p.lastIndexOf( '/' ) + 1 ) + src;
             }
           }
-          /** Generate the new src */
-          newSrc = window.location.protocol + '//' + s.d + '/' + ( ew ? ew : '' ) + 'x' + ( eh ? eh : '' ) + '/' + src + '?x=' + f.base64_encode( f.rc4( 'rly', x ) );
           /** Set a low width/height */
           $e.attr( '_style', $e.attr( 'style' ) );
           $e.attr( 'style', ( typeof $e.attr( '_style' ) != 'undefined' ? $e.attr( '_style' ).toString() : '' ) + 'width: 1px !important; height: 1px !important;' );
+          var il2 = imagesLoaded( e );
           /** Setup our images loaded function to restore width */
-          imagesLoaded( e, function( instance ){
+          var il_f2 = function( instance ){
             /** Restore the width */
             $e.attr( 'style', ( typeof $e.attr( '_style' ) == 'undefined' ? '' : $e.attr( '_style' ) ) );
             $e.removeAttr( '_style' );
-          } );
+          };
+          /** Listen to the event now */
+          il2.on( 'always', il_f2 );
+          /** Ok, lets see if we have data-width or data-height defined */
+          if( dw ){
+            ew = dw;
+          }
+          if( dh ){
+            eh = dh;
+          }
+          /** Generate the new src */
+          newSrc = window.location.protocol + '//' + s.d + '/' + ( ew ? ew : '' ) + 'x' + ( eh ? eh : '' ) + '/' + src + '?x=' + f.base64_encode( f.rc4( 'rly', x ) );
           /** Change the attribute */
           $e.attr( 'src', newSrc );
-        } );
+        };
+        /** Listen to the event now */
+        il.on( 'always', il_f );
         /** Change our attribute */
         $e.attr( 'src', window.location.protocol + '//' + s.d + transparent_img );
         /** Return this */
